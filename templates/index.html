@@ -11,6 +11,26 @@
         <h1 class="text-4xl font-bold mb-8">Hurricane Tracker</h1>
         
         <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">Find a Location</h2>
+            <form method="POST" action="/">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="location">
+                        Enter City, State, or Zip Code
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="location" name="location" type="text" placeholder="e.g., New York, NY or 10001">
+                </div>
+                <div class="flex items-center justify-between">
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                        Find Location
+                    </button>
+                </div>
+            </form>
+            {% if error %}
+            <p class="text-red-500 text-xs italic mt-4">{{ error }}</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <h2 class="text-2xl font-bold mb-4">Current Status</h2>
             <p class="mb-2"><strong>Status:</strong> {{ health_data.status }}</p>
             <p class="mb-2"><strong>Last Update:</strong> {{ health_data.last_update or 'Never' }}</p>
