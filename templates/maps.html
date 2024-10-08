@@ -1,0 +1,33 @@
+{% extends "header.html" %}
+
+{% block title %}Weather Maps{% endblock %}
+
+{% block content %}
+<div class="flex flex-col flex-grow space-y-8">
+    <h1 class="text-3xl font-bold text-center text-blue-800">Weather Maps</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <h2 class="text-2xl font-semibold bg-blue-500 text-white p-4">OpenStreetMap</h2>
+            <div class="w-full" style="height: calc((100vh - 12rem) / 2);">
+                <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-180%2C-90%2C180%2C90&amp;layer=mapnik" width="100%" height="100%" style="border: 0;" title="OpenStreetMap" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <h2 class="text-2xl font-semibold bg-blue-500 text-white p-4">Windy Map</h2>
+            <div class="w-full" style="height: calc((100vh - 12rem) / 2);">
+                <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=5&overlay=wind&product=ecmwf&level=surface&lat=${latitude}&lon=${longitude}&detailLat=${latitude}&detailLon=${longitude}&marker=true&message=true" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center text-gray-600">
+        <p>These maps provide real-time weather information and forecasts. Use the controls within each map to explore different locations and weather conditions.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

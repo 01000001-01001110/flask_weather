@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Weather - {{ location }}</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">Current Weather for {{ location }}</h1>
+        
+        <div class="mb-8">
+            <form action="{{ url_for('current_weather') }}" method="post" class="flex justify-center">
+                <input type="text" name="location" placeholder="Enter location" class="px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Search</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Current Conditions</h2>
+                <ul>
+                    <li class="mb-2"><strong>Temperature:</strong> {{ weather_data.temperature }}°F</li>
+                    <li class="mb-2"><strong>Apparent Temperature:</strong> {{ weather_data.apparent_temperature }}°F</li>
+                    <li class="mb-2"><strong>Relative Humidity:</strong> {{ weather_data.relative_humidity }}%</li>
+                    <li class="mb-2"><strong>Wind Speed:</strong> {{ weather_data.wind_speed }} mph</li>
+                    <li class="mb-2"><strong>Wind Direction:</strong> {{ weather_data.wind_direction }}°</li>
+                    <li class="mb-2"><strong>Wind Gusts:</strong> {{ weather_data.wind_gusts }} mph</li>
+                    <li class="mb-2"><strong>Precipitation:</strong> {{ weather_data.precipitation }} in</li>
+                    <li class="mb-2"><strong>Cloud Cover:</strong> {{ weather_data.cloud_cover }}%</li>
+                    <li class="mb-2"><strong>Pressure:</strong> {{ weather_data.pressure_msl }} hPa</li>
+                    <li class="mb-2"><strong>Weather Code:</strong> {{ weather_data.weather_code }}</li>
+                    <li class="mb-2"><strong>Is Day:</strong> {% if weather_data.is_day %}Yes{% else %}No{% endif %}</li>
+                </ul>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Weather Code Information</h2>
+                <p>Weather code {{ weather_data.weather_code }} represents:</p>
+                <p id="weather-description" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Weather Visualizations</h2>
+            <div id="weather-charts" style="width: 100%; height: 800px;"></div>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Home</a>
+            <a href="{{ url_for('visualize') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Forecast Visualizations</a>
+        </div>
+    </div>
+
+    <script>
+        var plotData = JSON.parse('{{ plot_json | safe }}');
+        Plotly.newPlot('weather-charts', plotData.data, plotData.layout);
+
+        // Weather code descriptions
+        const weatherCodes = {
+            0: "Clear sky",
+            1: "Mainly clear",
+            2: "Partly cloudy",
+            3: "Overcast",
+            45: "Fog",
+            48: "Depositing rime fog",
+            51: "Light drizzle",
+            53: "Moderate drizzle",
+            55: "Dense drizzle",
+            56: "Light freezing drizzle",
+            57: "Dense freezing drizzle",
+            61: "Slight rain",
+            63: "Moderate rain",
+            65: "Heavy rain",
+            66: "Light freezing rain",
+            67: "Heavy freezing rain",
+            71: "Slight snow fall",
+            73: "Moderate snow fall",
+            75: "Heavy snow fall",
+            77: "Snow grains",
+            80: "Slight rain showers",
+            81: "Moderate rain showers",
+            82: "Violent rain showers",
+            85: "Slight snow showers",
+            86: "Heavy snow showers",
+            95: "Thunderstorm",
+            96: "Thunderstorm with slight hail",
+            99: "Thunderstorm with heavy hail"
+        };
+
+        const weatherCode = {{ weather_data.weather_code }};
+        const weatherDescription = weatherCodes[weatherCode] || "Unknown weather condition";
+        document.getElementById("weather-description").textContent = weatherDescription;
+    </script>
+</body>
+</html>

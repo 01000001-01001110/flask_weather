@@ -1,0 +1,38 @@
+{% extends "header.html" %}
+
+{% block title %}Status{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <h2 class="text-2xl font-bold mb-4">Current Status</h2>
+    <div class="grid grid-cols-3 gap-4">
+        <div>
+            <p class="font-semibold">Status:</p>
+            <p class="text-xl {% if health_data.status == 'healthy' %}text-green-500{% else %}text-red-500{% endif %}">
+                {{ health_data.status|capitalize }}
+            </p>
+        </div>
+        <div>
+            <p class="font-semibold">Last Update:</p>
+            <p class="text-xl">{{ health_data.last_update or 'Never' }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Data Files:</p>
+            <p class="text-xl">{{ health_data.data_files|length }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="flex space-x-4 mb-8">
+    <a href="{{ url_for('forecast') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105">
+        Weather Forecast
+    </a>
+    <a href="{{ url_for('manual_fetch') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105">
+        Fetch New Data
+    </a>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

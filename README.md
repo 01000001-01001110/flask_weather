@@ -1,15 +1,21 @@
-# Hurricane Tracker Flask App
+# Weather Dashboard Flask App
 
-This Flask application provides a dashboard for tracking hurricane-related weather data. It fetches data from the Open-Meteo API and visualizes various weather parameters such as temperature, humidity, wind speed, precipitation, and pressure.
+This Flask application provides a comprehensive weather dashboard with interactive visualizations, maps, and real-time data from the Open-Meteo API. It offers detailed weather forecasts, current conditions, and various weather parameters for any location.
 
 ## Features
 
-- Location search using free geocoding service (Nominatim)
-- Fetches weather data every 15 minutes
-- Visualizes weather data in an interactive dashboard
-- Provides current weather conditions
-- Allows manual data fetching
-- Includes a health check endpoint
+- Location-based weather data retrieval using geocoding (Nominatim)
+- Fetches forecast and current weather data from Open-Meteo API
+- Interactive weather forecast visualization with Plotly
+- Current weather conditions display
+- Weather maps integration (OpenStreetMap and Windy)
+- Nearby webcams display using Windy API
+- Wind rose diagram for wind direction and speed analysis
+- Manual data refresh option
+- Scheduled background data updates (every 15 minutes)
+- Health check endpoint for monitoring application status
+- Responsive design with Tailwind CSS
+- Discord community link and GitHub repository link in the footer
 
 ## Setup
 
@@ -45,16 +51,6 @@ With your virtual environment activated, install the required packages using pip
 pip install flask openmeteo-requests requests-cache retry-requests pandas apscheduler plotly geopy
 ```
 
-This command will install the following packages:
-- Flask: Web framework
-- openmeteo-requests: Client for Open-Meteo API
-- requests-cache: Caching for HTTP requests
-- retry-requests: Retry mechanism for HTTP requests
-- pandas: Data manipulation library
-- APScheduler: Advanced Python Scheduler
-- plotly: Interactive plotting library
-- geopy: Geocoding library
-
 ## Running the application
 
 1. Make sure your virtual environment is activated.
@@ -74,18 +70,29 @@ This command will install the following packages:
 ## Usage
 
 - On the main page, enter a location (city, address, or landmark) to fetch weather data for that area.
-- The visualization dashboard displays interactive charts of various weather parameters.
-- To manually fetch new data, click the "Fetch New Data" button on the main page.
-- The health check endpoint (`/health`) provides information about the application's status and data availability.
+- The forecast visualization dashboard displays interactive charts of various weather parameters:
+  - Temperature and Humidity
+  - Wind Speed and Direction
+  - Precipitation
+- The current weather section shows detailed current conditions.
+- The Maps page provides integrated weather maps from OpenStreetMap and Windy.
+- To manually fetch new forecast data, click the "Refresh Data" button.
+- The Status page (`/status`) provides information about the application's health and data availability.
+- Join our Discord community or visit the GitHub repository using the links in the footer.
 
 ## File Structure
 
 - `app.py`: The main Flask application file
 - `templates/`:
+  - `header.html`: Base template with common head content
   - `index.html`: Template for the main page
-  - `visualize.html`: Template for the visualization dashboard
+  - `visualize.html`: Template for the forecast visualization dashboard
+  - `maps.html`: Template for weather maps
+  - `current_weather.html`: Template for the current weather page
+  - `status.html`: Template for the application status page
   - `error.html`: Template for error messages
-- `weather_data_*.json`: JSON files containing fetched weather data
+  - `footer.html`: Template for the footer, including Discord and GitHub links
+- `weather_data_*.json`: JSON files containing fetched weather forecast data
 
 ## Customization
 
@@ -99,11 +106,20 @@ If you encounter any issues:
 3. Verify that you have write permissions in the directory for storing JSON data files.
 4. If geocoding fails, try a different location or check your internet connection.
 
+## Community and Support
+
+- Join our Discord community for discussions, support, and updates: [Discord Invite Link](https://discord.gg/sCfj8c9CcK)
+- For bug reports and feature requests, please use the [GitHub issue tracker](https://github.com/01000001-01001110/flask_weather/issues).
+
 ## Contributing
 
-Contributions to improve the Hurricane Tracker Flask App are welcome. Please feel free to submit pull requests or open issues to discuss potential changes or enhancements, please make sure that you have tested your changes and provide quaily notes on the modifications you are suggesting. 
+Contributions to improve the Weather Dashboard Flask App are welcome. Please feel free to submit pull requests or open issues to discuss potential changes or enhancements. Make sure that you have tested your changes and provide quality notes on the modifications you are suggesting.
 
 Remember to deactivate the virtual environment when you're done:
 ```
 deactivate
 ```
+
+## License
+
+This project is open-source and available under the MIT License. See the LICENSE file for more details.

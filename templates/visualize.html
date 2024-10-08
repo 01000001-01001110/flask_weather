@@ -1,25 +1,201 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-8">Weather Dashboard</h1>
-        <div id="weather-dashboard"></div>
-        <div class="mt-8">
-            <a href="/" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Back to Home
-            </a>
+{% extends "header.html" %}
+
+{% block title %}Weather Visualization{% endblock %}
+
+{% block content %}
+<div id="coordinates" data-lat="{{ latitude }}" data-lon="{{ longitude }}" style="display: none;"></div>
+<div id="root" class="space-y-4">
+    <h1 class="text-3xl font-bold mb-4">Weather 3 Day Forecast Visualization</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-2">Current Weather</h2>
+            <div id="current-weather" class="grid grid-cols-2 gap-4">
+                <!-- Current weather data will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-lg md:col-span-2">
+            <h2 class="text-xl font-semibold mb-2">Nearby Webcams</h2>
+            <div>
+                <a name="windy-webcam-nearby-embed" id="windy-webcam-embed"></a>
+                <script async type="text/javascript" src="https://webcams.windy.com/webcams/public/embed/v2/script/nearby.js"></script>
+            </div>
         </div>
     </div>
-    <script>
-        var plot_json = {{ plot_json | safe }};
-        Plotly.newPlot('weather-dashboard', plot_json.data, plot_json.layout);
-    </script>
-</body>
-</html>
+
+    <div class="mb-4">
+        <div class="flex border-b" id="tab-buttons"></div>
+        <div class="py-4" id="tab-content"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-2">Wind Rose Diagram</h2>
+            <div id="wind-rose" class="chart-container"></div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-2">Weather Map</h2>
+            <div id="windy-map"></div>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="{{ url_for('index') }}" class="font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 bg-transparent border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
+            Home
+        </a>
+        <a href="{{ url_for('manual_fetch') }}" class="font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 bg-blue-500 hover:bg-blue-700 text-white">
+            Refresh Data
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    const plotDataString = '{{ plot_json | safe }}';
+    const plotData = JSON.parse(plotDataString.replace(/&#34;/g, '"'));
+
+    // Populate current weather data
+    const currentWeatherDiv = document.getElementById('current-weather');
+    const currentWeather = plotData.current_weather;
+    for (const [key, value] of Object.entries(currentWeather)) {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <p class="text-sm text-gray-500">${key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.replace(/_/g, ' ').slice(1)}</p>
+            <p class="text-lg font-semibold">${typeof value === 'number' ? value.toFixed(1) : value}</p>
+        `;
+        currentWeatherDiv.appendChild(div);
+    }
+
+    // Set up Windy components
+    const coordinatesDiv = document.getElementById('coordinates');
+    const latitude = parseFloat(coordinatesDiv.getAttribute('data-lat'));
+    const longitude = parseFloat(coordinatesDiv.getAttribute('data-lon'));
+
+    // Set up Windy Webcam Embed
+    document.getElementById('windy-webcam-embed').setAttribute('data-params', JSON.stringify({lat: latitude, lon: longitude}));
+
+    // Set up Windy Map Embed
+    const windyMapContainer = document.getElementById('windy-map');
+    const windyMapIframe = document.createElement('iframe');
+    windyMapIframe.width = '100%';
+    windyMapIframe.height = '300';
+    windyMapIframe.frameBorder = '0';
+    windyMapIframe.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=5&overlay=wind&product=ecmwf&level=surface&lat=${latitude}&lon=${longitude}&detailLat=${latitude}&detailLon=${longitude}&marker=true&message=true`;
+    windyMapContainer.appendChild(windyMapIframe);
+
+    // Create tabs
+    const tabButtons = document.getElementById('tab-buttons');
+    const tabContent = document.getElementById('tab-content');
+    const tabs = [
+        { id: 'temperature', label: 'Temperature & Humidity' },
+        { id: 'wind', label: 'Wind' },
+        { id: 'precipitation', label: 'Precipitation' }
+    ];
+
+    let activeTab = 'temperature';
+
+    function createTab(tab) {
+        const button = document.createElement('button');
+        button.className = `py-2 px-4 font-semibold ${activeTab === tab.id ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-blue-500'}`;
+        button.textContent = tab.label;
+        button.onclick = () => setActiveTab(tab.id);
+        tabButtons.appendChild(button);
+    }
+
+    function setActiveTab(tabId) {
+        activeTab = tabId;
+        updateTabs();
+        updateTabContent();
+    }
+
+    function updateTabs() {
+        tabButtons.innerHTML = '';
+        tabs.forEach(createTab);
+    }
+
+    function updateTabContent() {
+        tabContent.innerHTML = '';
+        const content = document.createElement('div');
+        content.className = 'bg-white p-4 rounded-lg shadow-lg';
+        
+        switch (activeTab) {
+            case 'temperature':
+                content.innerHTML = `
+                    <h2 class="text-xl font-semibold mb-2">Temperature & Humidity Forecast</h2>
+                    <div id="temp-humidity-chart" class="chart-container"></div>
+                `;
+                tabContent.appendChild(content);
+                Plotly.newPlot('temp-humidity-chart', plotData.temp_humidity_data, {
+                    yaxis: {title: 'Temperature (°F)', range: [0, 100]},
+                    yaxis2: {title: 'Humidity (%)', overlaying: 'y', side: 'right', range: [0, 100]},
+                    showlegend: true,
+                    legend: {orientation: 'h', y: -0.2},
+                    margin: {l: 50, r: 50, t: 30, b: 50},
+                    hovermode: 'closest'
+                });
+                break;
+            case 'wind':
+                content.innerHTML = `
+                    <h2 class="text-xl font-semibold mb-2">Wind Speed Forecast</h2>
+                    <div id="wind-chart" class="chart-container"></div>
+                `;
+                tabContent.appendChild(content);
+                Plotly.newPlot('wind-chart', plotData.wind_data, {
+                    yaxis: {title: 'Wind Speed (mph)', range: [0, 30]},
+                    yaxis2: {title: 'Wind Direction (°)', overlaying: 'y', side: 'right', range: [0, 360]},
+                    showlegend: true,
+                    legend: {orientation: 'h', y: -0.2},
+                    margin: {l: 50, r: 50, t: 30, b: 50},
+                    hovermode: 'closest'
+                });
+                break;
+            case 'precipitation':
+                content.innerHTML = `
+                    <h2 class="text-xl font-semibold mb-2">Precipitation Forecast</h2>
+                    <div id="precipitation-chart" class="chart-container"></div>
+                `;
+                tabContent.appendChild(content);
+                Plotly.newPlot('precipitation-chart', plotData.precipitation_data, {
+                    yaxis: {title: 'Precipitation (in)', range: [0, 1]},
+                    showlegend: true,
+                    legend: {orientation: 'h', y: -0.2},
+                    margin: {l: 50, r: 50, t: 30, b: 50},
+                    hovermode: 'closest'
+                });
+                break;
+        }
+    }
+
+    // Initialize tabs
+    updateTabs();
+    updateTabContent();
+
+    // Create Wind Rose Diagram
+    Plotly.newPlot('wind-rose', [{
+        r: plotData.wind_speeds,
+        theta: plotData.wind_directions,
+        mode: 'markers',
+        name: 'Wind Direction and Speed',
+        marker: {
+            color: plotData.wind_speeds,
+            colorscale: 'Viridis',
+            size: 8,
+            colorbar: {title: 'Wind Speed (mph)'}
+        },
+        type: 'scatterpolar'
+    }], {
+        polar: {
+            radialaxis: { visible: true, range: [0, 30] },
+            angularaxis: {direction: "clockwise"}
+        },
+        showlegend: false,
+        margin: {l: 50, r: 50, t: 30, b: 50}
+    });
+</script>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}
