@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, redirect, url_for
+from flask import Flask, jsonify, render_template, redirect, url_for, request
 import openmeteo_requests
 import requests_cache
 import pandas as pd
@@ -10,8 +10,13 @@ import json
 import plotly
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
 app = Flask(__name__)
+
+# Setup geocoder
+geolocator = Nominatim(user_agent="hurricane_tracker_app")
 
 # Setup the Open-Meteo API client with cache and retry on error
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
@@ -32,9 +37,11 @@ params = {
     "forecast_days": 3
 }
 
-def fetch_weather_data():
+def fetch_weather_data(latitude, longitude):
     try:
-        responses = openmeteo_requests.weather_api(url, params=params)
+        params["latitude"] = latitude
+        params["longitude"] = longitude
+        responses = openmeteo.weather_api(url, params=params)
         response = responses[0]
         
         # Process current data
@@ -79,11 +86,28 @@ def fetch_weather_data():
 
 # Schedule the data fetching task
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=fetch_weather_data, trigger="interval", minutes=15)
+scheduler.add_job(func=lambda: fetch_weather_data(params["latitude"], params["longitude"]), trigger="interval", minutes=15)
 scheduler.start()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        location = request.form['location']
+        try:
+            location_data = geolocator.geocode(location)
+            if location_data:
+                lat = location_data.latitude
+                lng = location_data.longitude
+                params["latitude"] = lat
+                params["longitude"] = lng
+                fetch_weather_data(lat, lng)
+                return redirect(url_for('visualize'))
+            else:
+                error = "Location not found. Please try again."
+                return render_template('index.html', error=error)
+        except (GeocoderTimedOut, GeocoderUnavailable):
+            error = "Geocoding service is currently unavailable. Please try again later."
+            return render_template('index.html', error=error)
     health_data = get_health_data()
     return render_template('index.html', health_data=health_data)
 
@@ -199,7 +223,7 @@ def health_check():
 
 @app.route('/fetch', methods=['GET'])
 def manual_fetch():
-    fetch_weather_data()
+    fetch_weather_data(params["latitude"], params["longitude"])
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
