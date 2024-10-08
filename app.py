@@ -226,9 +226,5 @@ def manual_fetch():
         return render_template('status.html', error="Failed to fetch weather data. Please try again later.")
 
 if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser(description="Run the Weather Dashboard Flask App")
-    arg_parser.add_argument('--port', type=int, default=8080, help="Port to run the Flask app on (default: 8080)")
-    args = arg_parser.parse_args()
-    
-    print(f"Starting Flask app on port {args.port}")
-    app.run(debug=True, port=args.port)
+    port = int(os.environ.get('FLASK_RUN_PORT', 8080))
+    app.run(host='0.0.0.0', port=port)

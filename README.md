@@ -67,6 +67,28 @@ pip install flask openmeteo-requests requests-cache retry-requests pandas apsche
 
 3. Open a web browser and navigate to `http://localhost:8080` (or the port you specified).
 
+## Docker Setup and Usage
+
+To run the Weather Dashboard Flask App using Docker, follow these steps:
+
+1. Make sure you have Docker installed on your system.
+
+2. Build the Docker image:
+   ```
+   docker build -t weather-dashboard .
+   ```
+
+3. Run the Docker container:
+   ```
+   docker run -p 8080:8080 weather-dashboard
+   ```
+
+   This command maps port 8080 from the container to port 8080 on your host machine.
+
+4. Open a web browser and navigate to `http://localhost:8080` to access the application.
+
+To stop the container, press `Ctrl+C` in the terminal where the container is running.
+
 ## Usage
 
 - On the main page, enter a location (city, address, or landmark) to fetch weather data for that area.
@@ -93,6 +115,8 @@ pip install flask openmeteo-requests requests-cache retry-requests pandas apsche
   - `error.html`: Template for error messages
   - `footer.html`: Template for the footer, including Discord and GitHub links
 - `weather_data_*.json`: JSON files containing fetched weather forecast data
+- `Dockerfile`: Instructions for building the Docker image
+- `.dockerignore`: Specifies files and directories to be excluded from the Docker build context
 
 ## Customization
 
@@ -105,6 +129,7 @@ If you encounter any issues:
 2. Check that the Open-Meteo API is accessible and responding.
 3. Verify that you have write permissions in the directory for storing JSON data files.
 4. If geocoding fails, try a different location or check your internet connection.
+5. For Docker-related issues, ensure Docker is installed and running correctly on your system.
 
 ## Community and Support
 
