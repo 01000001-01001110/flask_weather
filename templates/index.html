@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hurricane Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">Hurricane Tracker</h1>
+        
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">Current Status</h2>
+            <p class="mb-2"><strong>Status:</strong> {{ health_data.status }}</p>
+            <p class="mb-2"><strong>Last Update:</strong> {{ health_data.last_update or 'Never' }}</p>
+            <p class="mb-4"><strong>Data Files:</strong> {{ health_data.data_files|length }}</p>
+            
+            <div class="flex space-x-4">
+                <a href="/visualize" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    View Weather Dashboard
+                </a>
+                <a href="/fetch" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    Fetch New Data
+                </a>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">About This App</h2>
+            <p class="mb-2">This Hurricane Tracker app fetches weather data every 15 minutes to provide up-to-date information for hurricane tracking.</p>
+            <p class="mb-2">Use the "View Weather Dashboard" button to see visualizations of the latest weather data.</p>
+            <p>If you need to refresh the data immediately, use the "Fetch New Data" button.</p>
+        </div>
+    </div>
+</body>
+</html>
